@@ -7,8 +7,8 @@
 // =====================================================================
 
 window.APP_CONFIG = Object.freeze({
-  SUPABASE_URL: 'https://TVOJ-PROJEKAT.supabase.co',
-  SUPABASE_ANON_KEY: 'TVOJ-ANON-KLJUC',
+  SUPABASE_URL: 'https://bqzhslnjkboolxdjonmq.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_80fHXbnl-mqRuHfH4WPMzQ_qEXWdhr9',
 
   // Prikazuje se u zaglavlju (može i prazno).
   CLASS_NAME: 'III-1',

@@ -88,6 +88,9 @@ order by poslednji desc;
 
 -- a) Funkcije koje anon sme da pokrene. Očekivano je TAČNO ovih 6:
 --    get_overview, login, logout, ping, save_my_entry, start_edit
+--    (+ rls_auto_enable ako je pri pravljenju projekta uključeno "Enable RLS on new
+--     tables automatically". To je Supabase-ov event trigger; ne može se pozvati
+--     direktno, pa je bezopasan.)
 select n.nspname as sema, p.proname as funkcija
 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
 where n.nspname in ('public', 'private')
