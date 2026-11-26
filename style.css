@@ -427,3 +427,8 @@ button.day:hover { background: var(--pen-soft); }
 .legend dt, .legend dd { margin: 0; }
 .legend dd { color: var(--ink-2); font-size: .85rem; }
 .row-foot { flex-wrap: wrap; }
+
+/* razmak između polja i dugmeta (i kad nema poruke o grešci) */
+.form-error { margin: .6rem 0 0; }
+.form-error:empty { margin: 0; }
+form > .btn-block { margin-top: 1rem; }
