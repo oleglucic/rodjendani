@@ -1,0 +1,37 @@
+# Supabase besplatni projekat se pauzira posle 7 dana bez aktivnosti.
+# Ovaj workflow dva puta nedeljno pozove bezopasnu funkciju ping(),
+# pa projekat ostaje budan. URL i ključ čita iz config.js (anon ključ je ionako javan).
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: '17 7 * * 1,4'   # ponedeljak i četvrtak, 07:17 UTC
+  workflow_dispatch:          # ručno pokretanje iz kartice Actions
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pročitaj config.js
+        run: |
+          node -e '
+            globalThis.window = {};
+            require("./config.js");
+            const c = window.APP_CONFIG;
+            require("fs").appendFileSync(process.env.GITHUB_ENV,
+              `SB_URL=${c.SUPABASE_URL}\nSB_KEY=${c.SUPABASE_ANON_KEY}\n`);
+          '
+
+      - name: Ping
+        run: |
+          curl --fail --silent --show-error --max-time 30 \
+            -X POST "$SB_URL/rest/v1/rpc/ping" \
+            -H "apikey: $SB_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{}'
