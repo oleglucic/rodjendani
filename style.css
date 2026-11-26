@@ -432,3 +432,17 @@ button.day:hover { background: var(--pen-soft); }
 .form-error { margin: .6rem 0 0; }
 .form-error:empty { margin: 0; }
 form > .btn-block { margin-top: 1rem; }
+
+/* ---------- školski kalendar ---------- */
+.day.break, .legend-break {
+  background-image: repeating-linear-gradient(135deg, var(--break) 0 2px, transparent 2px 7px);
+}
+.day.off { background-image: repeating-linear-gradient(135deg, var(--break) 0 1px, transparent 1px 7px); }
+.legend-break {
+  display: inline-block; width: 1.6rem; height: 1rem; vertical-align: middle;
+  border: 1px solid var(--rule); border-radius: 4px;
+}
+.school-note { margin: .1rem 0 .4rem; color: var(--pen); font-weight: 600; font-size: .9rem; }
+.school-note .ic, .overlap .mi .ic { color: var(--pen); }
+:root { --break: #c9d4f2; }
+@media (prefers-color-scheme: dark) { :root { --break: #2c3a66; } }

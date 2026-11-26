@@ -12,6 +12,7 @@ rodjendan/
 ├─ style.css             izgled
 ├─ app.js                logika aplikacije
 ├─ ics.js                pravljenje .ics fajlova za kalendar
+├─ skolski-kalendar.js   raspusti i praznici 2026/27 (iz pravilnika ministarstva)
 ├─ config.js             Supabase URL i ključ (jedino što menjaš)
 ├─ fonts/                font (lokalno, bez Google zahteva)
 ├─ supabase/

@@ -218,6 +218,37 @@
   }
 
   // ------------------------------------------------------------------
+  //  Školski kalendar (raspusti, praznici, dani bez nastave)
+  // ------------------------------------------------------------------
+  const SCHOOL = window.SCHOOL_CALENDAR || { events: [] };
+  const schoolEvents = (k) => SCHOOL.events.filter((e) => k >= e.from && k <= (e.to || e.from));
+  const noClasses = (k) => schoolEvents(k).some((e) => e.type !== 'oznaka');
+  const isBreak = (k) => schoolEvents(k).some((e) => e.type === 'raspust');
+
+  function isSchoolDay(k) {
+    const dow = parseKey(k).getDay();
+    if (dow === 0 || dow === 6) return false;
+    if (!SCHOOL.firstDay || k < SCHOOL.firstDay || k > SCHOOL.lastDay) return false;
+    return !noClasses(k);
+  }
+
+  function fmtRange(from, to) {
+    const a = parseKey(from);
+    if (!to || to === from) return `${a.getDate()}. ${MONTHS_GEN[a.getMonth()]}`;
+    const b = parseKey(to);
+    return a.getMonth() === b.getMonth()
+      ? `od ${a.getDate()}. do ${b.getDate()}. ${MONTHS_GEN[b.getMonth()]}`
+      : `od ${a.getDate()}. ${MONTHS_GEN[a.getMonth()]} do ${b.getDate()}. ${MONTHS_GEN[b.getMonth()]}`;
+  }
+
+  // tekstovi za taj dan: raspust prvi, sa trajanjem
+  function schoolNotes(k) {
+    return schoolEvents(k)
+      .sort((x, y) => (x.type === 'raspust' ? -1 : 0) - (y.type === 'raspust' ? -1 : 0))
+      .map((e) => (e.type === 'raspust' && e.to ? `${e.label}, ${fmtRange(e.from, e.to)}` : e.label));
+  }
+
+  // ------------------------------------------------------------------
   //  .ics
   // ------------------------------------------------------------------
   function downloadIcs(list, filename) {
@@ -261,6 +292,7 @@
     calPlus: ['M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4', 'M12 13v5', 'M9.5 15.5h5'],
     alert: ['M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z', 'M12 10v4', 'M12 17.5v.01'],
     download: ['M12 4v11', 'M7 10l5 5 5-5', 'M5 20h14'],
+    school: ['M3 9l9-5 9 5-9 5-9-5z', 'M7 11.2V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.8', 'M21 9v6'],
   };
   function icon(name) {
     const NS = 'http://www.w3.org/2000/svg';
@@ -335,6 +367,7 @@
           el('span', { class: 'bar-txt', text: shortName(s.full_name) }))));
 
       const desc = [
+        ...schoolNotes(k),
         ...bdays.map((s) => `rođendan: ${s.full_name}`),
         ...parties.map((s) => `proslava: ${s.full_name}, ${STATUS_LABEL[s.status]}`),
       ];
@@ -343,6 +376,8 @@
       if (k === tk) cls.push('today');
       if (k === state.selected) cls.push('selected');
       if (dow === 5 || dow === 6 || dow === 0) cls.push('wk');
+      if (isBreak(k)) cls.push('break');
+      else if (noClasses(k)) cls.push('off');
 
       cells.push(el('button', {
         type: 'button',
@@ -384,8 +419,10 @@
           el('div', { class: 'row-foot' }, icsButton(s)))));
     }
 
+    const notes = schoolNotes(k);
     fill(box,
       el('h3', { class: 'day-title cap', text: fmtLong(k) }),
+      notes.length ? el('p', { class: 'school-note' }, withIcon('school', notes.join('. '))) : null,
       parties.length > 1 ? el('p', { class: 'warn' }, withIcon('alert', `Ovog dana su ${parties.length} proslave.`)) : null,
       rows.length ? el('ul', { class: 'agenda' }, rows)
         : el('p', { class: 'empty-day', text: 'Ovog dana nema ni rođendana ni proslava.' }));
@@ -545,6 +582,12 @@
     }
     if (ov.bdays.length) {
       rows.push(el('div', { class: 'muted' }, `Tog dana rođendan ima: ${ov.bdays.map((s) => s.full_name).join(', ')}`));
+    }
+    // školski kalendar: raspust/praznik tog dana i da li je sutradan nastava
+    const notes = schoolNotes(k);
+    if (notes.length) rows.push(el('div', { class: 'muted' }, withIcon('school', notes.join('. '))));
+    if (isSchoolDay(keyOfDate(addDays(parseKey(k), 1)))) {
+      rows.push(el('div', { class: 'muted' }, withIcon('school', 'Sutradan je nastava.')));
     }
 
     const conflict = ov.same.length || ov.weekend.length;
