@@ -230,6 +230,14 @@
   // ------------------------------------------------------------------
   //  Prikaz: zajednički delovi
   // ------------------------------------------------------------------
+  // abecedno po prezimenu (srpska latinica: č, ć, đ, š, ž na pravom mestu), pa po imenu
+  const collator = new Intl.Collator('sr-Latn');
+  const surnameKey = (name) => { const p = name.split(' '); return [p.slice(1).join(' '), p[0]]; };
+  function bySurname(a, b) {
+    const [sa, fa] = surnameKey(a.full_name), [sb, fb] = surnameKey(b.full_name);
+    return collator.compare(sa, sb) || collator.compare(fa, fb);
+  }
+
   const isConfirmed = (s) => s.status === 'potvrdjeno';
   const MONTHS_SHORT = MONTHS.map((m) => m.slice(0, 3));
 
@@ -385,7 +393,7 @@
     const withDate = all.filter((s) => s.party_date)
       .sort((a, b) => (a.party_date + (a.party_time || '')).localeCompare(b.party_date + (b.party_time || '')));
     const noDate = all.filter((s) => !s.party_date)
-      .sort((a, b) => a.full_name.localeCompare(b.full_name, 'sr'));
+      .sort(bySurname);
 
     const pct = all.length ? Math.round((withDate.length / all.length) * 100) : 0;
     fill($('list-summary'),
@@ -454,7 +462,7 @@
     const sel = $('code-student');
     const prev = sel.value;
     const opts = [el('option', { value: '', text: '— izaberi svoje ime —' })];
-    [...state.students].sort((a, b) => a.full_name.localeCompare(b.full_name, 'sr'))
+    [...state.students].sort(bySurname)
       .forEach((s) => opts.push(el('option', { value: s.id, text: s.full_name })));
     sel.replaceChildren(...opts);
     if (prev) sel.value = prev;
