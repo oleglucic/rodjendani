@@ -230,9 +230,15 @@
   // ------------------------------------------------------------------
   //  Prikaz: zajednički delovi
   // ------------------------------------------------------------------
-  // abecedno po prezimenu (srpska latinica: č, ć, đ, š, ž na pravom mestu), pa po imenu
-  const collator = new Intl.Collator('sr-Latn');
-  const surnameKey = (name) => { const p = name.split(' '); return [p.slice(1).join(' '), p[0]]; };
+  // Po prezimenu pa po imenu, po AZBUCI kao u dnevniku (A B V G D Đ E Ž Z I J K L Lj M N Nj
+  // O P R S T Ć U F H C Č Dž Š). Imena su na latinici, pa ih za poređenje prevodimo u ćirilicu.
+  const collator = new Intl.Collator('sr-Cyrl');
+  const LAT2CYR = { a: 'а', b: 'б', v: 'в', g: 'г', d: 'д', đ: 'ђ', e: 'е', ž: 'ж', z: 'з', i: 'и', j: 'ј',
+    k: 'к', l: 'л', m: 'м', n: 'н', o: 'о', p: 'п', r: 'р', s: 'с', t: 'т', ć: 'ћ', u: 'у', f: 'ф',
+    h: 'х', c: 'ц', č: 'ч', š: 'ш' };
+  const toCyr = (s) => s.toLowerCase().replace(/lj/g, 'љ').replace(/nj/g, 'њ').replace(/dž/g, 'џ')
+    .replace(/[a-zđžćčš]/g, (ch) => LAT2CYR[ch] || ch);
+  const surnameKey = (name) => { const p = name.split(' '); return [toCyr(p.slice(1).join(' ')), toCyr(p[0])]; };
   function bySurname(a, b) {
     const [sa, fa] = surnameKey(a.full_name), [sb, fb] = surnameKey(b.full_name);
     return collator.compare(sa, sb) || collator.compare(fa, fb);
